@@ -1,18 +1,17 @@
 import express from "express";
 import path from "path";
+import fs from "fs"; // 新增：用於讀取本地文件系統
 import { createServer as createViteServer } from "vite";
 import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 
-// --- AWS S3 Configuration ---
+// --- 配置 ---
 const MOCK_S3_FOR_TESTING = process.env.MOCK_S3 === "true";
+const LOCAL_DATA_PATH = path.join(process.cwd(), "data", "summary_result");
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || "us-east-1",
 });
-
-const BUCKET_NAME = process.env.S3_BUCKET || "comp4442-grouproject-group8";
-const SUMMARY_PATH = "summary_result/";
 
 async function startServer() {
   const app = express();
@@ -20,15 +19,46 @@ async function startServer() {
 
   app.use(express.json());
 
-  // --- API Route: Fetch Summary from Spark Output ---
+  // --- API Route: Fetch Summary ---
   app.get("/api/driver-summary", async (req, res) => {
-    // --- 模擬模式 (用於本地測試) ---
+    // 1. 優先檢查本地數據 (Localhost Data)
+    if (fs.existsSync(LOCAL_DATA_PATH)) {
+      try {
+        const files = fs.readdirSync(LOCAL_DATA_PATH);
+        // 尋找 .txt 或 .parquet 文件
+        const dataFile = files.find(f => f.endsWith(".txt") || f.endsWith(".parquet"));
+        
+        if (dataFile) {
+          console.log(`DEBUG: Loading local data from ${dataFile}`);
+          const filePath = path.join(LOCAL_DATA_PATH, dataFile);
+          const stats = fs.statSync(filePath);
+          
+          // 如果是 .txt 文件，我們可以讀取前幾行來驗證數據
+          let preview = "";
+          if (dataFile.endsWith(".txt")) {
+            const content = fs.readFileSync(filePath, 'utf8');
+            preview = content.split('\n').slice(0, 5).join('\n'); // 獲取前 5 行
+          }
+
+          return res.json({ 
+            status: "connected", 
+            source: "local_filesystem",
+            message: `Found local Spark output: ${dataFile}`,
+            lastModified: stats.mtime,
+            preview: preview // 將數據預覽傳回前端
+          });
+        }
+      } catch (err) {
+        console.error("Local data read error:", err);
+      }
+    }
+
+    // 2. 模擬模式 (用於本地測試，無 AWS 憑證時)
     if (MOCK_S3_FOR_TESTING) {
-      console.log("DEBUG: Running in MOCK_S3 mode for local testing.");
       return res.json({ 
         status: "connected", 
         source: "simulated_s3",
-        message: "Simulated Spark output: part-00000-simulated.parquet",
+        message: "Simulated Spark output (Mock Mode)",
         lastModified: new Date().toISOString()
       });
     }
