@@ -1,0 +1,5 @@
+{
+  "name": "Driver Behavior Analysis System",
+  "description": "A dashboard for monitoring and analyzing driver behavior, including speed monitoring, overspeed warnings, and driving summaries.",
+  "requestFramePermissions": []
+}
