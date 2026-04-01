@@ -5,13 +5,13 @@ import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/clien
 import { Readable } from "stream";
 
 // --- AWS S3 Configuration ---
-// Note: In a real AWS environment, you would use IAM roles or environment variables.
+const MOCK_S3_FOR_TESTING = process.env.MOCK_S3 === "true";
+
 const s3Client = new S3Client({
-  region: "us-east-1", // Update to your S3 region
-  // credentials: { accessKeyId: "...", secretAccessKey: "..." }
+  region: process.env.AWS_REGION || "us-east-1",
 });
 
-const BUCKET_NAME = "comp4442-grouproject-group8";
+const BUCKET_NAME = process.env.S3_BUCKET || "comp4442-grouproject-group8";
 const SUMMARY_PATH = "summary_result/";
 
 async function startServer() {
@@ -22,7 +22,23 @@ async function startServer() {
 
   // --- API Route: Fetch Summary from Spark Output ---
   app.get("/api/driver-summary", async (req, res) => {
+    // --- 模擬模式 (用於本地測試) ---
+    if (MOCK_S3_FOR_TESTING) {
+      console.log("DEBUG: Running in MOCK_S3 mode for local testing.");
+      return res.json({ 
+        status: "connected", 
+        source: "simulated_s3",
+        message: "Simulated Spark output: part-00000-simulated.parquet",
+        lastModified: new Date().toISOString()
+      });
+    }
+
     try {
+      // 1. 檢查是否有 AWS 憑證
+      if (!process.env.AWS_ACCESS_KEY_ID && !MOCK_S3_FOR_TESTING) {
+        return res.json({ status: "offline", message: "No AWS Credentials found" });
+      }
+
       // 1. List files in the Spark output folder
       const listCommand = new ListObjectsV2Command({
         Bucket: BUCKET_NAME,

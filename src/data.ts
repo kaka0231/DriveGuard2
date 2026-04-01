@@ -15,6 +15,14 @@ export interface SpeedData {
   speed: number;
 }
 
+export interface DriverEvent {
+  id: string;
+  timestamp: string;
+  type: 'Overspeed' | 'Fatigue' | 'NeutralSlide' | 'RapidSpeedup' | 'RapidSlowdown' | 'OilLeak';
+  value: string;
+  location: string;
+}
+
 export interface Driver {
   id: string;
   name: string;
@@ -22,6 +30,7 @@ export interface Driver {
   behaviorSummary: DriverBehavior;
   currentSpeed: number;
   speedHistory: SpeedData[];
+  recentEvents: DriverEvent[];
 }
 
 export const MOCK_DRIVERS: Driver[] = [
@@ -45,6 +54,11 @@ export const MOCK_DRIVERS: Driver[] = [
       timestamp: new Date(Date.now() - (20 - i) * 30000).toLocaleTimeString(),
       speed: 60 + Math.random() * 20,
     })),
+    recentEvents: [
+      { id: "E1", timestamp: "10:15:22", type: "Overspeed", value: "85 km/h", location: "Guangzhou Ave" },
+      { id: "E2", timestamp: "10:45:10", type: "RapidSpeedup", value: "+15 km/h/s", location: "Tianhe Rd" },
+      { id: "E3", timestamp: "11:20:05", type: "NeutralSlide", value: "45s", location: "Zhongshan Rd" },
+    ]
   },
   {
     id: "2",
@@ -66,6 +80,10 @@ export const MOCK_DRIVERS: Driver[] = [
       timestamp: new Date(Date.now() - (20 - i) * 30000).toLocaleTimeString(),
       speed: 50 + Math.random() * 15,
     })),
+    recentEvents: [
+      { id: "E4", timestamp: "09:30:15", type: "Fatigue", value: "Level 1", location: "Huanshi Rd" },
+      { id: "E5", timestamp: "10:10:45", type: "Overspeed", value: "75 km/h", location: "Dongfeng Rd" },
+    ]
   },
   {
     id: "3",
@@ -87,6 +105,11 @@ export const MOCK_DRIVERS: Driver[] = [
       timestamp: new Date(Date.now() - (20 - i) * 30000).toLocaleTimeString(),
       speed: 70 + Math.random() * 30,
     })),
+    recentEvents: [
+      { id: "E6", timestamp: "08:15:22", type: "Overspeed", value: "105 km/h", location: "Expressway S1" },
+      { id: "E7", timestamp: "09:45:10", type: "Fatigue", value: "Level 3", location: "Service Area B" },
+      { id: "E8", timestamp: "11:20:05", type: "OilLeak", value: "Detected", location: "Main St" },
+    ]
   },
   {
     id: "4",
@@ -108,6 +131,9 @@ export const MOCK_DRIVERS: Driver[] = [
       timestamp: new Date(Date.now() - (20 - i) * 30000).toLocaleTimeString(),
       speed: 40 + Math.random() * 10,
     })),
+    recentEvents: [
+      { id: "E9", timestamp: "14:15:22", type: "NeutralSlide", value: "12s", location: "Park Ave" },
+    ]
   },
   {
     id: "5",
@@ -129,5 +155,9 @@ export const MOCK_DRIVERS: Driver[] = [
       timestamp: new Date(Date.now() - (20 - i) * 30000).toLocaleTimeString(),
       speed: 65 + Math.random() * 20,
     })),
+    recentEvents: [
+      { id: "E10", timestamp: "16:15:22", type: "RapidSlowdown", value: "-20 km/h/s", location: "Ring Rd" },
+      { id: "E11", timestamp: "17:45:10", type: "Overspeed", value: "88 km/h", location: "Bridge St" },
+    ]
   },
 ];

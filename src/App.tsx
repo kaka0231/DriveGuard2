@@ -27,7 +27,8 @@ import {
   CheckCircle2,
   XCircle,
   TrendingUp,
-  Users
+  Users,
+  EyeOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MOCK_DRIVERS, Driver, DriverBehavior } from './data';
@@ -446,6 +447,45 @@ export default function App() {
                         <p className="font-bold text-slate-800">8 Years</p>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                {/* Detailed Records Log */}
+                <div className="mt-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-800">Recent Detailed Records</h3>
+                      <p className="text-sm text-slate-500">Individual events from detail-records file</p>
+                    </div>
+                    <div className="px-3 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-600">
+                      {selectedDriver.recentEvents.length} Events
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {selectedDriver.recentEvents.map((event) => (
+                      <div key={event.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div className="flex items-center gap-4">
+                          <div className={cn(
+                            "p-2 rounded-xl",
+                            event.type === 'Overspeed' ? "bg-rose-100 text-rose-600" :
+                            event.type === 'Fatigue' ? "bg-amber-100 text-amber-600" :
+                            "bg-indigo-100 text-indigo-600"
+                          )}>
+                            {event.type === 'Overspeed' && <AlertTriangle className="w-5 h-5" />}
+                            {event.type === 'Fatigue' && <EyeOff className="w-5 h-5" />}
+                            {(event.type !== 'Overspeed' && event.type !== 'Fatigue') && <Activity className="w-5 h-5" />}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900">{event.type}</p>
+                            <p className="text-xs text-slate-500">{event.location} • {event.timestamp}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-slate-900">{event.value}</p>
+                          <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Value</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </section>
