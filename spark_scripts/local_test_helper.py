@@ -12,12 +12,15 @@ if not os.path.exists(output_dir):
 # 2. 模擬 Spark 的聚合邏輯
 summary = {}
 
-print("正在掃描 data/ 目錄下的 .txt 文件...")
+print("正在掃描 data/ 目錄下的原始數據文件...")
 
 for filename in os.listdir(input_dir):
-    if filename.endswith(".txt") and "detail_record" in filename:
-        print(f"正在處理: {filename}")
-        with open(os.path.join(input_dir, filename), 'r', encoding='utf-8') as f:
+    # 修改：只要文件名包含 detail_record 且不是目錄就處理
+    file_path = os.path.join(input_dir, filename)
+    if os.path.isfile(file_path) and "detail_record" in filename:
+        print(f"正在處理原始數據: {filename}")
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
             reader = csv.reader(f)
             for row in reader:
                 if len(row) < 19: continue
