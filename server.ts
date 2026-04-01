@@ -25,17 +25,17 @@ async function startServer() {
     if (fs.existsSync(LOCAL_DATA_PATH)) {
       try {
         const files = fs.readdirSync(LOCAL_DATA_PATH);
-        // 尋找 .txt 或 .parquet 文件
-        const dataFile = files.find(f => f.endsWith(".txt") || f.endsWith(".parquet"));
+        // 尋找 .csv, .txt 或 .parquet 文件
+        const dataFile = files.find(f => f.endsWith(".csv") || f.endsWith(".txt") || f.endsWith(".parquet"));
         
         if (dataFile) {
           console.log(`DEBUG: Loading local data from ${dataFile}`);
           const filePath = path.join(LOCAL_DATA_PATH, dataFile);
           const stats = fs.statSync(filePath);
           
-          // 如果是 .txt 文件，我們可以讀取前幾行來驗證數據
+          // 如果是 .txt 或 .csv 文件，我們可以讀取前幾行來驗證數據
           let preview = "";
-          if (dataFile.endsWith(".txt")) {
+          if (dataFile.endsWith(".txt") || dataFile.endsWith(".csv")) {
             const content = fs.readFileSync(filePath, 'utf8');
             preview = content.split('\n').slice(0, 5).join('\n'); // 獲取前 5 行
           }
