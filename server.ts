@@ -13,6 +13,9 @@ const s3Client = new S3Client({
   region: process.env.AWS_REGION || "us-east-1",
 });
 
+const BUCKET_NAME = process.env.S3_BUCKET || "comp4442-grouproject-group8";
+const SUMMARY_PATH = "summary_result/";
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -33,11 +36,10 @@ async function startServer() {
           const filePath = path.join(LOCAL_DATA_PATH, dataFile);
           const stats = fs.statSync(filePath);
           
-          // 如果是文本類文件，讀取預覽
-          let preview = "";
+          // 如果是文本類文件，讀取全部內容
+          let fileContent = "";
           if (dataFile.startsWith("part-") || dataFile.endsWith(".txt") || dataFile.endsWith(".csv")) {
-            const content = fs.readFileSync(filePath, 'utf8');
-            preview = content.split('\n').slice(0, 5).join('\n'); // 獲取前 5 行
+            fileContent = fs.readFileSync(filePath, 'utf8');
           }
 
           return res.json({ 
@@ -45,7 +47,7 @@ async function startServer() {
             source: "local_filesystem",
             message: `Found local Spark output: ${dataFile}`,
             lastModified: stats.mtime,
-            preview: preview // 將數據預覽傳回前端
+            data: fileContent // 傳回完整數據內容
           });
         }
       } catch (err) {

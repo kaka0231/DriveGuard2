@@ -55,8 +55,41 @@ export default function App() {
       try {
         const response = await fetch('/api/driver-summary');
         const result = await response.json();
-        if (result.status === 'connected') {
+        if (result.status === 'connected' && result.data) {
           setS3Status(`Connected: ${result.message}`);
+          
+          // Parse CSV data
+          const lines = result.data.trim().split('\n');
+          if (lines.length > 1) {
+            const headers = lines[0].split(',');
+            const newDrivers: Driver[] = lines.slice(1).map((line: string, index: number) => {
+              const values = line.split(',');
+              const dId = values[0];
+              const plate = values[1];
+              const overspeed = parseInt(values[2]) || 0;
+              const fatigue = parseInt(values[3]) || 0;
+              const overspeedTime = parseInt(values[4]) || 0;
+              const neutralTime = parseInt(values[5]) || 0;
+              
+              // Find if driver already exists in MOCK_DRIVERS to keep some details
+              const existing = MOCK_DRIVERS.find(d => d.id === dId) || MOCK_DRIVERS[index % MOCK_DRIVERS.length];
+              
+              return {
+                ...existing,
+                id: dId,
+                name: dId.replace(/[0-9]/g, ''), // Remove numbers for a cleaner name
+                carPlate: plate,
+                behaviorSummary: {
+                  ...existing.behaviorSummary,
+                  overspeedCount: overspeed,
+                  fatigueDrivingCount: fatigue,
+                  totalOverspeedTime: overspeedTime,
+                  neutralSlideTime: neutralTime,
+                }
+              };
+            });
+            setDrivers(newDrivers);
+          }
         } else {
           setS3Status('S3 Data Not Found - Using Mock Data');
         }

@@ -21,9 +21,9 @@ for filename in os.listdir(input_dir):
         print(f"正在處理原始數據: {filename}")
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                if len(row) < 19: continue
+                reader = csv.reader(f)
+                for row in reader:
+                    if len(row) < 19: continue
                 
                 driver_id = row[0]
                 car_plate = row[1]
